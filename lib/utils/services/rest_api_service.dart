@@ -68,7 +68,7 @@ class ApiService {
       http.post(
           Uri.https(
             BASE_URL,
-            'images/',
+            'imagesb64/',
           ),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',

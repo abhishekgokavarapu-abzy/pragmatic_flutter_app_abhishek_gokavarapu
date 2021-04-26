@@ -21,7 +21,8 @@ class _CreateReportScreenBodyState extends State<CreateReportScreenBody> {
   @override
   Widget build(BuildContext context) {
     _choose() async {
-      final pickedFile = await picker.getImage(source: ImageSource.gallery);
+      final pickedFile = await picker.getImage(
+          source: ImageSource.gallery, maxHeight: 400, maxWidth: 400);
       file = File(pickedFile.path);
     }
 
