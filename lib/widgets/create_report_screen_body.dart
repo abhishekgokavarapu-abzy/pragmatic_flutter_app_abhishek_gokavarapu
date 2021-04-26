@@ -15,7 +15,7 @@ class CreateReportScreenBody extends StatefulWidget {
 class _CreateReportScreenBodyState extends State<CreateReportScreenBody> {
   String title;
   String description;
-  String images = '';
+  String uploadImage = '';
   File file;
   final picker = ImagePicker();
   @override
@@ -32,9 +32,11 @@ class _CreateReportScreenBodyState extends State<CreateReportScreenBody> {
         String fileName = file.path.split("/").last;
         Navigator.pushNamed(context, LoadingScreen.id);
         var responseData = await ApiService.uploadImage(base64Image, fileName);
-        if (responseData.statusCode != 200) {
-          print(responseData.statusCode);
+        if (responseData.statusCode != 201) {
           print(responseData.body);
+          List<Map<dynamic, dynamic>> decodedData =
+              jsonDecode(responseData.body);
+          uploadImage = decodedData[0]['image'].toString();
           Navigator.pop(context);
           showDialog(
               context: context,
@@ -42,10 +44,7 @@ class _CreateReportScreenBodyState extends State<CreateReportScreenBody> {
                     title: Text('Error - Upload Again!'),
                   ));
         } else {
-          List<Map<dynamic, dynamic>> decodedResponseData =
-              jsonDecode(responseData.body);
-          String decodedImages = decodedResponseData[0]["image"].toString();
-          images = decodedImages;
+          print(responseData.statusCode);
           Navigator.pop(context);
           showDialog(
               context: context,
@@ -92,8 +91,8 @@ class _CreateReportScreenBodyState extends State<CreateReportScreenBody> {
           ),
           TextButton(
               onPressed: () async {
-                var responseData =
-                    await ApiService.createReport(title, description, images);
+                var responseData = await ApiService.createReport(
+                    title, description, uploadImage);
                 Navigator.pushNamed(context, LoadingScreen.id);
                 if (responseData.statusCode != 200) {
                   Navigator.pop(context);
