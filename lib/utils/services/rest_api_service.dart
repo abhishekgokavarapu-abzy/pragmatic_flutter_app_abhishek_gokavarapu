@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart';
 
 class ApiService {
   static const String BASE_URL = 'rise-app-staging.herokuapp.com';
@@ -63,20 +65,34 @@ class ApiService {
             'status': reportStatus,
           }));
 
-  static Future<http.Response> uploadImage(
-          String base64Image, String imageName) =>
-      http.post(
-          Uri.https(
-            BASE_URL,
-            'imagesb64/',
-          ),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(<String, String>{'image': base64Image}));
+  static Future<int> uploadImage(File file) async {
+    var stream = new http.ByteStream(file.openRead());
+    var length = await file.length();
+    var uri = Uri.https(
+      BASE_URL,
+      'images/',
+    );
+    var request = http.MultipartRequest("POST", uri);
+    var multipartFile = new http.MultipartFile('image', stream, length,
+        filename: basename(file.path));
+    request.files.add(multipartFile);
+    var response = await request.send();
+    print(response.statusCode);
+    print(response.reasonPhrase);
+    return response.statusCode;
+  }
 
-  static Future<http.Response> createReport(
-          String title, String description, String images) =>
+  // http.post(
+  //     Uri.https(
+  //       BASE_URL,
+  //       'imagesb64/',
+  //     ),
+  //     headers: <String, String>{
+  //       'Content-Type': 'application/json; charset=UTF-8',
+  //     },
+  //     body: jsonEncode(<String, String>{'image': base64Image}));
+
+  static Future<http.Response> createReport(String title, String description) =>
       http.post(
           Uri.https(
             BASE_URL,
@@ -89,6 +105,5 @@ class ApiService {
             'title': title,
             'description': description,
             'status': 'PENDING',
-            'images': images,
           }));
 }

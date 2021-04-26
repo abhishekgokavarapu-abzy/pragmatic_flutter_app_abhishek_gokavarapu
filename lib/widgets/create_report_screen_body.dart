@@ -15,7 +15,6 @@ class CreateReportScreenBody extends StatefulWidget {
 class _CreateReportScreenBodyState extends State<CreateReportScreenBody> {
   String title;
   String description;
-  String uploadImage = '';
   File file;
   final picker = ImagePicker();
   @override
@@ -28,15 +27,10 @@ class _CreateReportScreenBodyState extends State<CreateReportScreenBody> {
 
     _upload() async {
       if (file != null) {
-        String base64Image = base64Encode(file.readAsBytesSync());
-        String fileName = file.path.split("/").last;
         Navigator.pushNamed(context, LoadingScreen.id);
-        var responseData = await ApiService.uploadImage(base64Image, fileName);
-        if (responseData.statusCode != 201) {
-          print(responseData.body);
-          List<Map<dynamic, dynamic>> decodedData =
-              jsonDecode(responseData.body);
-          uploadImage = decodedData[0]['image'].toString();
+        int statusCode = await ApiService.uploadImage(file);
+        Navigator.pop(context);
+        if (statusCode != 201) {
           Navigator.pop(context);
           showDialog(
               context: context,
@@ -44,7 +38,7 @@ class _CreateReportScreenBodyState extends State<CreateReportScreenBody> {
                     title: Text('Error - Upload Again!'),
                   ));
         } else {
-          print(responseData.statusCode);
+          print(statusCode);
           Navigator.pop(context);
           showDialog(
               context: context,
@@ -91,10 +85,12 @@ class _CreateReportScreenBodyState extends State<CreateReportScreenBody> {
           ),
           TextButton(
               onPressed: () async {
-                var responseData = await ApiService.createReport(
-                    title, description, uploadImage);
+                var responseData =
+                    await ApiService.createReport(title, description);
                 Navigator.pushNamed(context, LoadingScreen.id);
                 if (responseData.statusCode != 200) {
+                  var a = jsonDecode(responseData.body);
+                  print(a);
                   Navigator.pop(context);
                   showDialog(
                       context: context,

@@ -19,7 +19,6 @@ class _ReportScreenBodyState extends State<ReportScreenBody> {
         await ApiService.getReports(context.read<AppDataProvider>().authKey);
     if (responseData.statusCode != 200) {
       print(responseData.statusCode);
-      print(jsonDecode(responseData.body));
       Navigator.pushNamed(context, LoginScreen.id);
       showDialog(
           context: context,
